@@ -41,8 +41,6 @@ const App = () => {
       const response = await axios.post(apiUrl, messageToSend, headers);
       setMessages([...messages, response.data]);
       setTimeout(scrollToBottom, 0);
-      console.log(response.data);
-      console.log(messages);
     }
     catch (err) {
       console.log("Error: " + err.message);
