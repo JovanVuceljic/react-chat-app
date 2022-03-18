@@ -1,23 +1,21 @@
 import "./App.css";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import axios from 'axios';
 import Message from "./components/Message"
-import { setMessages, addMessage } from "./state/actions";
 
 const App = () => {
 
-  const token = "NqebNLtXsswN";
-  const author = "Jovan";
+  const tokens = ["u4wbEFmRn3Et", "S3U3w8D2TgSM", "Ih65fg5moM4D", "SeHbURlODegY", "T15dbJhHcbCv", "vkwFJpkHTLB1"];
   const apiUrl = "https://chatty.kubernetes.doodle-test.com/api/chatty/v1.0/";
-  const limit = 20;
-  const since = Date.now() - (86400000 * 5); // 5 days before
-
-  const dispatch = useDispatch();
-  const messages = useSelector((state) => state.allMessages.messages || []);
+  const limit = 30;
+  const since = Date.now() - (86400000 * 10); // 10 days before
 
   const divRef = React.useRef(null);
+  const [messages, setMessages] = useState("");
   const [messageText, setMessageText] = useState("");
+  const [token, setToken] = useState(null);
+  const [author, setAuthor] = useState(null);
+  const [isLogged, setLogged] = useState(false);
 
   const scrollToBottom = () => {
     divRef.current.scrollIntoView({
@@ -26,29 +24,37 @@ const App = () => {
     })
   }
 
+  const handleLogin = async () => {
+    if(author && tokens.includes(token)){
+      setLogged(true);
+      fetchMessages();
+    }
+  }
+
   const handleSendMessage = async () => {
     const messageToSend = {
       "message": messageText,
       "author": author
     }
     try {
-      const headers = { headers: { 'token': 'NqebNLtXsswN', 'Content-Type': 'application/json' } };
+      const headers = { headers: { 'token': token, 'Content-Type': 'application/json' } };
       const response = await axios.post(apiUrl, messageToSend, headers);
-      dispatch(addMessage(response.data));
+      setMessages([...messages, response.data]);
       setTimeout(scrollToBottom, 0);
+      console.log(response.data);
+      console.log(messages);
     }
     catch (err) {
       console.log("Error: " + err.message);
     }
   }
 
-  const getReq = `${apiUrl}?since=${since}&limit=${limit}&token=${token}`;
-
   const fetchMessages = async () => {
+    const getReq = `${apiUrl}?since=${since}&limit=${limit}&token=${token}`;
     try {
       const response = await axios
         .get(getReq)
-      dispatch(setMessages(response.data));
+      setMessages(response.data);
       scrollToBottom();
     }
     catch (err) {
@@ -57,26 +63,47 @@ const App = () => {
   }
 
   useEffect(() => {
-    fetchMessages();
-  }, [])
-
+    const timer = setInterval(() => {
+      fetchMessages();
+    }, 3000);
+    return () => clearInterval(timer);
+  });
 
   return (
     <div className="app" ref={divRef}>
       <div className="background"></div>
-      <div className="messages" >
-        {messages.length !== 0 && messages.map((message, i) => <Message key={i} message={message} author={author} />)}
-      </div>
-      <div className="footer">
-        <div className="footer-wrap">
-          <div className="input-wrap">
-            <input className="input" type="text" placeholder="Message" onChange={(e) => setMessageText(e.target.value)} />
+      {isLogged ? (
+        <div className="chat">
+          <div className="messages" >
+            {messages.length !== 0 && messages.map((message, i) => <Message key={i} message={message} author={author} />)}
           </div>
-          <div className="btn-wrap">
-            <button className="btn" onClick={handleSendMessage}>Send</button>
+          <div className="footer">
+            <div className="footer-wrap">
+              <div className="input-wrap">
+                <input className="input" type="text" placeholder="Message" onChange={(e) => setMessageText(e.target.value)} />
+              </div>
+              <div className="btn-wrap">
+                <button className="btn" onClick={handleSendMessage}>Send</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="login" >
+          <div className="select-wrap">
+            <select className="input" onChange={(e) => setToken(e.target.options[e.target.options.selectedIndex].value)}>
+              <option>Select room..</option>
+              {tokens.map((t, i) => <option value={t} key={i}>{t}</option>)}
+            </select>
+          </div>
+          <div className="input-wrap">
+            <input type="name" className="input" placeholder="Enter your name" onChange={(e) => setAuthor(e.target.value)} />
+          </div>
+          <div className="btn-wrap">
+            <button className="btn btn-login" onClick={handleLogin}>Login</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ const Message = ({ message, author }) => {
 		<div className="text">
 			{message.message}
 		</div>
-		<div className="time">{getFormatedDate(message.timestamp)}</div>
+		<div className="time">{getFormatedDate(parseInt(message.timestamp))}</div>
 	</div>)
 }
 
