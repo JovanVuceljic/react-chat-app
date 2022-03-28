@@ -22,16 +22,21 @@
   outline: none;
 }
 
+.input.error {
+  border: 2px solid rgba(255, 0, 0, 0.7);
+}
+
 .btn {
   background-color: var(--orange);
   height: 100%;
-  color:  var(--white);
+  color: var(--white);
   border: none;
   text-decoration: none;
   padding: 10px 15px;
   display: block;
   border-radius: 5px;
   margin-left: 8px;
+  outline: none;
 }
 
 .btn:hover {

@@ -43,8 +43,12 @@
   margin: 10px auto 0 auto;
   width: 95%;
 }
+.error-message {
+  color: var(--grey);
+  padding-top: 15px;
+}
+/* Chat */
 
-/* Messages */
 .chat {
   display: flex;
   flex: 1;
